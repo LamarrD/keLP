@@ -1,0 +1,35 @@
+Resources:
+  TrailBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: least-privilege-bucket-logging
+
+  TrailBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref TrailBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Sid: AWSCloudTrailAclCheck
+          Effect: Allow
+          Principal:
+            Service: cloudtrail.amazonaws.com
+          Action: s3:GetBucketAcl
+          Resource: !Join
+            - ""
+            - - "arn:aws:s3:::"
+              - !Ref TrailBucket
+        - Sid: AWSCloudTrailWrite
+          Effect: Allow
+          Principal:
+            Service: cloudtrail.amazonaws.com
+          Action: s3:PutObject
+          Resource: !Join
+            - ""
+            - - "arn:aws:s3:::"
+              - !Ref TrailBucket
+              - /AWSLogs/875765950574/*
+          Condition:
+            StringEquals:
+              s3:x-amz-acl: bucket-owner-full-control

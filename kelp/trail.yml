@@ -1,0 +1,14 @@
+Resources:
+  TestTrail:
+    Type: AWS::CloudTrail::Trail
+    Properties:
+      IsLogging: True
+      S3BucketName: least-privilege-bucket-logging
+      EventSelectors:
+        - ReadWriteType: WriteOnly
+          IncludeManagementEvents: false
+          DataResources:
+            - Type: AWS::S3::Object
+              Values:
+                - arn:aws:s3
+      TrailName: lpTrail

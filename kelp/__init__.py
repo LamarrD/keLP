@@ -7,33 +7,68 @@ import logging
 import argparse
 import boto3
 from time import sleep, time
-from formatter import CustomFormatter
 
 
 logger = logging.getLogger(__name__)
 
 
-def deploy_application():
+# Colors - https://stackoverflow.com/questions/384076/how-can-i-color-python-logging-output
+# Success - https://gist.github.com/hit9/5635505
+class CustomFormatter(logging.Formatter):
+    """Logging Formatter to add colors and count warning / errors"""
+
+    grey = "\x1b[2m"
+    white = "\x1b[38;21m"
+    green = "\x1b[32;1m"
+    yellow = "\x1b[33;1m"
+    red = "\x1b[31;21m"
+    bold_red = "\x1b[31;1m"
+    reset = "\x1b[0m"
+    format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
+    format = "keLP - {funcName} - {message}"
+
+    logging.SUCCESS = 25  # between WARNING and INFO
+    logging.addLevelName(logging.SUCCESS, "SUCCESS")
+
+    FORMATS = {
+        logging.DEBUG: grey + format + reset,
+        logging.INFO: white + format + reset,
+        logging.SUCCESS: green + format + reset,
+        logging.WARNING: yellow + format + reset,
+        logging.ERROR: bold_red + format + reset,
+        logging.CRITICAL: red + format + reset,
+    }
+
+    def format(self, record):
+        log_fmt = self.FORMATS.get(record.levelno)
+        formatter = logging.Formatter(log_fmt, style="{")
+        return formatter.format(record)
+
+
+def deploy_application(args):
     """Run a sls deploy ton deploy the severless application"""
     logger.info("Deploying application...")
-    os.chdir("iac")
-    result = subprocess.run(["sls", "deploy", "--stage=prod", "-v"])
-    # result = subprocess.run(["sls", "deploy", "--stage=prod"], stdout=subprocess.DEVNULL)
+    logger.info(f"Checking in {args.path} for IAC files")
+    os.chdir(args.path)
+
+    if args.debug:
+        result = subprocess.run(["sls", "deploy", "--stage=prod", "-v"])
+    else:
+        result = subprocess.run(["sls", "deploy", "--stage=prod"], stdout=subprocess.DEVNULL)
 
     if result.returncode != 0:
         logger.exception("Failed to deploy application")
         sys.exit()
-    else:
-        print(result)
     os.chdir("..")
     logger.info("Application deployed successfully")
 
 
 def deploy_trail():
     """Create s3 bucket and cloudtrail via cfn"""
+    my_dir = os.path.dirname(__file__)
     logger.info("Creating cloudtrail and accompanying logging bucket...")
     client = boto3.client("cloudformation", region_name="us-east-1")
-    cfn_template_body = open("./iac/bucket.yml").read()
+    cfn_template_body = open(os.path.join(my_dir, "bucket.yml")).read()
     response = client.create_stack(
         StackName="lp-bucket-stack",
         TemplateBody=cfn_template_body,
@@ -45,7 +80,7 @@ def deploy_trail():
         sleep(2)
         response = client.describe_stacks(StackName="lp-bucket-stack")
 
-    cfn_template_body = open("./iac/trail.yml").read()
+    cfn_template_body = open(os.path.join(my_dir, "trail.yml")).read()
     response = client.create_stack(
         StackName="lp-trail-stack",
         TemplateBody=cfn_template_body,
@@ -62,10 +97,10 @@ def deploy_trail():
     sleep(3)
 
 
-def get_functions():
+def get_functions(args):
     """Read lambda function definitions from IAC"""
     functions = {}
-    iac_file = "iac/.serverless/serverless-state.json"
+    iac_file = f"{args.path}/.serverless/serverless-state.json"
     logger.info(f"Reading lambdas and permissions from {iac_file}...")
     iac_file_data = json.load(open(iac_file))
 
@@ -190,10 +225,10 @@ def compare_permissions(functions):
 
         logger.error(f"Lambda {function['name']} doesn't have a least privileged IAM role")
         logger.error(f"The role was: {json.dumps(policy,indent=2)}")
-        logger.error(f"The least privileged role is: {json.dumps(lp_policy,indent=2)}")
+        logger.success(f"The role should be: {json.dumps(lp_policy,indent=2)}")
 
 
-def cleanup():
+def cleanup(args):
     """Remove resources created, s3 bucket, cloudtrail, stacks"""
     logger.info("Cleaning up all AWS resources used")
     s3_client = boto3.client("s3", region_name="us-east-1")
@@ -231,7 +266,7 @@ def cleanup():
         bucket = s3.Bucket("least-privilege-bucket")
         bucket.objects.all().delete()
 
-    os.chdir("iac")
+    os.chdir(args.path)
     result = subprocess.run(["sls", "remove", "--stage=prod"], stdout=subprocess.DEVNULL)
     if result.returncode != 0:
         logger.exception("Failed to remove application from AWS")
@@ -253,6 +288,7 @@ def setup():
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("-v", "--verbose", help="see detailed output", action="store_true")
     parser.add_argument("-d", "--debug", help="see debugging output", action="store_true")
+    parser.add_argument("-p", "--path", help="path to folder containing IAC", default="iac")
     args = parser.parse_args()
 
     # Setup Logger
@@ -275,20 +311,25 @@ def setup():
     logger.warning("warning")
     logger.error("error")
     logger.critical("critical")
+    return args
 
 
-if __name__ == "__main__":
+def main():
+    args = setup()
     try:
-        setup()
-        deploy_application()
+        deploy_application(args)
         deploy_trail()
-        functions = get_functions()
+        functions = get_functions(args)
         invoke_functions(functions)
         functions = get_used_permissions(functions)
         compare_permissions(functions)
     except Exception as e:
         logger.error(e, exc_info=True)
     finally:
-        cleanup()
+        cleanup(args)
         pass
     # cleanup()
+
+
+if __name__ == "__main__":
+    main()
