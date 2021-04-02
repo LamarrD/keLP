@@ -3,7 +3,7 @@ Resources:
     Type: AWS::CloudTrail::Trail
     Properties:
       IsLogging: True
-      S3BucketName: least-privilege-bucket-logging
+      S3BucketName: kelp-bucket-logging
       EventSelectors:
         - ReadWriteType: WriteOnly
           IncludeManagementEvents: false
@@ -11,4 +11,4 @@ Resources:
             - Type: AWS::S3::Object
               Values:
                 - arn:aws:s3
-      TrailName: lpTrail
+      TrailName: kelpTrail

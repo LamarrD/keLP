@@ -70,27 +70,27 @@ def deploy_trail():
     client = boto3.client("cloudformation", region_name="us-east-1")
     cfn_template_body = open(os.path.join(my_dir, "bucket.yml")).read()
     response = client.create_stack(
-        StackName="lp-bucket-stack",
+        StackName="kelp-bucket-stack",
         TemplateBody=cfn_template_body,
     )
 
     # Wait for bucket stack to finish deploying to deploy trail
-    response = client.describe_stacks(StackName="lp-bucket-stack")
+    response = client.describe_stacks(StackName="kelp-bucket-stack")
     while response["Stacks"][0]["StackStatus"] == "CREATE_IN_PROGRESS":
         sleep(2)
-        response = client.describe_stacks(StackName="lp-bucket-stack")
+        response = client.describe_stacks(StackName="kelp-bucket-stack")
 
     cfn_template_body = open(os.path.join(my_dir, "trail.yml")).read()
     response = client.create_stack(
-        StackName="lp-trail-stack",
+        StackName="kelp-trail-stack",
         TemplateBody=cfn_template_body,
     )
 
     # Wait for trail to deploy to finish
-    response = client.describe_stacks(StackName="lp-trail-stack")
+    response = client.describe_stacks(StackName="kelp-trail-stack")
     while response["Stacks"][0]["StackStatus"] == "CREATE_IN_PROGRESS":
         sleep(2)
-        response = client.describe_stacks(StackName="lp-trail-stack")
+        response = client.describe_stacks(StackName="kelp-trail-stack")
 
     logger.info("Cloudtrail deployed successfully")
     # NOTE - Cloudtrail weird, give it a sec to settle
@@ -140,7 +140,7 @@ def get_used_permissions(functions):
     """Check cloudtrail logs to see what permissions the lambdas used"""
     logger.info("Checking for cloudtrail logs...")
     s3 = boto3.resource("s3")
-    bucket = s3.Bucket("least-privilege-bucket-logging")
+    bucket = s3.Bucket("kelp-bucket-logging")
     lambdas = set()
 
     # TODO template ACCOUNT ID
@@ -165,7 +165,7 @@ def get_used_permissions(functions):
     s3 = boto3.client("s3")
     for log_file in log_files:
         filename = f"test{time()}.gz"
-        s3.download_file("least-privilege-bucket-logging", log_file, filename)
+        s3.download_file("kelp-bucket-logging", log_file, filename)
         f = gzip.open(filename, "rb")
         file_content = f.read()
         data = json.loads(file_content)
@@ -235,11 +235,11 @@ def cleanup(args):
     s3 = boto3.resource("s3")
 
     # Cleanup logging bucket
-    if s3.Bucket("least-privilege-bucket-logging") in s3.buckets.all():
+    if s3.Bucket("kelp-bucket-logging") in s3.buckets.all():
         logger.info("Deleting logging bucket...")
-        bucket = s3.Bucket("least-privilege-bucket-logging")
+        bucket = s3.Bucket("kelp-bucket-logging")
         bucket.objects.all().delete()
-        response = s3_client.delete_bucket(Bucket="least-privilege-bucket-logging")
+        response = s3_client.delete_bucket(Bucket="kelp-bucket-logging")
 
     # Cleanup cfn stacks for trail and accompanying logging bucket
     client = boto3.client("cloudformation", region_name="us-east-1")
@@ -261,9 +261,9 @@ def cleanup(args):
 
     # Destroy application
     # NOTE - when this is in localstack I won't need to worry about this
-    if s3.Bucket("least-privilege-bucket") in s3.buckets.all():
+    if s3.Bucket("kelp-bucket") in s3.buckets.all():
         logger.info("Deleting application bucket...")
-        bucket = s3.Bucket("least-privilege-bucket")
+        bucket = s3.Bucket("kelp-bucket")
         bucket.objects.all().delete()
 
     os.chdir(args.path)
@@ -305,12 +305,12 @@ def setup():
         ch.setLevel(logging.INFO)
 
     logger.addHandler(ch)
-    logger.debug("debug")
-    logger.info("info")
-    logger.success("success")
-    logger.warning("warning")
-    logger.error("error")
-    logger.critical("critical")
+    # logger.debug("debug")
+    # logger.info("info")
+    # logger.success("success")
+    # logger.warning("warning")
+    # logger.error("error")
+    # logger.critical("critical")
     return args
 
 
@@ -327,8 +327,6 @@ def main():
         logger.error(e, exc_info=True)
     finally:
         cleanup(args)
-        pass
-    # cleanup()
 
 
 if __name__ == "__main__":
