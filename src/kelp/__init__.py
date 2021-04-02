@@ -297,6 +297,7 @@ def setup():
     ch.setFormatter(CustomFormatter())
     setattr(logger, "success", lambda message, *args: logger._log(logging.SUCCESS, message, args))
     logger.setLevel(logging.SUCCESS)
+    logger.success("Starting")
 
     if args.debug:
         logger.setLevel(logging.DEBUG)

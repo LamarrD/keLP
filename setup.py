@@ -7,7 +7,7 @@ setup(
     author_email="henry.773@osu.edu",
     description="Serverless IAM least privilege automation",
     entry_points={
-        "console_scripts": ["kelp=src.__init__:main"],
+        "console_scripts": ["kelp=kelp.__init__:main"],
     },
     include_package_data=True,
     install_requires=["boto3"],
