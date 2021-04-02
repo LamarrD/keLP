@@ -268,7 +268,10 @@ def cleanup(args):
         bucket.objects.all().delete()
 
     os.chdir(args.path)
-    result = subprocess.run(["sls", "remove", "--stage=prod"], stdout=subprocess.DEVNULL)
+    if args.debug:
+        result = subprocess.run(["sls", "remove", "--stage=prod"])
+    else:
+        result = subprocess.run(["sls", "remove", "--stage=prod"], stdout=subprocess.DEVNULL)
     if result.returncode != 0:
         logger.exception("Failed to remove application from AWS")
         sys.exit()
