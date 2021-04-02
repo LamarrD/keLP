@@ -1,19 +1,20 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name="keLP",
     version="0.0.1",
-    description="Serverless IAM least privilege automation",
-    url="https://github.com/LamarrD/keLP",
     author="LamarrD",
     author_email="henry.773@osu.edu",
-    license="MIT",
-    packages=["kelp"],
-    install_requires=["boto3"],
-    zip_safe=False,
-    package_data={"": ["*"]},
-    include_package_data=True,
+    description="Serverless IAM least privilege automation",
     entry_points={
-        "console_scripts": ["kelp=kelp.__init__:main"],
+        "console_scripts": ["kelp=src.__init__:main"],
     },
+    include_package_data=True,
+    install_requires=["boto3"],
+    license="MIT",
+    packages=find_packages(where="src"),
+    package_data={"": ["*"]},
+    package_dir={"": "src"},
+    url="https://github.com/LamarrD/keLP",
+    zip_safe=False,
 )

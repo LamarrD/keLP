@@ -111,7 +111,7 @@ def get_functions(args):
             "Properties"
         ]["Policies"]:
             for statement in lambda_policies["PolicyDocument"]["Statement"]:
-                # NOTE need to Evaluate Intrinsic functions for resources if they need it
+                # TODO need to Evaluate Intrinsic functions for resources if they need it
                 statements = statement
 
         functions[lambda_function["name"]] = {
@@ -142,13 +142,14 @@ def get_used_permissions(functions):
     s3 = boto3.resource("s3")
     bucket = s3.Bucket("kelp-bucket-logging")
     lambdas = set()
+    client = boto3.client("sts")
+    account_id = client.get_caller_identity()["Account"]
 
-    # TODO template ACCOUNT ID
-    objs = list(bucket.objects.filter(Prefix="AWSLogs/875765950574/CloudTrail/us-east-1"))
+    objs = list(bucket.objects.filter(Prefix=f"AWSLogs/{account_id}/CloudTrail/us-east-1"))
     timeout_start = time()
     while len(objs) == 0:
         sleep(3)
-        objs = list(bucket.objects.filter(Prefix="AWSLogs/875765950574/CloudTrail/us-east-1"))
+        objs = list(bucket.objects.filter(Prefix=f"AWSLogs/{account_id}/CloudTrail/us-east-1"))
 
         # If it's been over 60 seconds try invoking the functions again
         if time() - timeout_start > 60:
@@ -305,12 +306,6 @@ def setup():
         ch.setLevel(logging.INFO)
 
     logger.addHandler(ch)
-    # logger.debug("debug")
-    # logger.info("info")
-    # logger.success("success")
-    # logger.warning("warning")
-    # logger.error("error")
-    # logger.critical("critical")
     return args
 
 
