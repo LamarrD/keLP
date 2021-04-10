@@ -1,0 +1,30 @@
+on: [push]
+
+jobs:
+  keLP:
+    runs-on: ubuntu-latest
+    name: Check Least Privilege
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      - name: "Setup Node"
+        uses: actions/setup-node@v1
+        with:
+          node-version: "12.x"
+      - name: "Install Serverless"
+        run: npm install -g serverless
+      - name: "Setup Python 3"
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
+      - name: "Install requirements"
+        run: pip3 install aws-kelp
+      - name: "Run keLP"
+        run: kelp
+        working-directory: examples

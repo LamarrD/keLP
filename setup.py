@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="keLP",
+    name="aws-keLP",
     version="0.0.1",
     author="LamarrD",
     author_email="henry.773@osu.edu",

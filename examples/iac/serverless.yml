@@ -1,0 +1,78 @@
+service: kelp
+provider:
+  # profile: personal
+  name: aws
+  runtime: python3.7
+  lambdaHashingVersion: 20201221
+  environment:
+    bucket: ${self:service}-bucket
+
+package:
+  excludeDevDependencies: True
+  exclude:
+    - ./**
+  include:
+    - ../backend/main.py
+
+functions:
+  lp-lambda:
+    handler: backend/main.lambda_handler
+    role: lpIAMRole
+  op-lambda:
+    handler: backend/main.lambda_handler
+    role: opIAMRole
+
+resources:
+  Resources:
+    bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:service}-bucket
+
+    lpIAMRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: ${self:service}-lp-role
+        AssumeRolePolicyDocument:
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: s3Write
+            PolicyDocument:
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - s3:PutObject
+                  Resource: arn:aws:s3:::kelp-bucket/test.txt
+
+    opIAMRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: ${self:service}-op-role
+        AssumeRolePolicyDocument:
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: admin
+            PolicyDocument:
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - "*"
+                  Resource:
+                    - "*"
+# plugins:
+#   - serverless-localstack
+
+# custom:
+# localstack:
+#   stages:
+#     - dev

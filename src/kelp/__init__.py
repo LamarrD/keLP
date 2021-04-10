@@ -5,7 +5,10 @@ import os
 import subprocess
 import logging
 import argparse
+
 import boto3
+
+# import localstack_client.session as boto3
 from time import sleep, time
 
 
@@ -253,12 +256,12 @@ def cleanup(args):
             "DELETE_FAILED",
         ]
     )
-    if "lp-bucket-stack" in [stack["StackName"] for stack in response["StackSummaries"]]:
+    if "kelp-bucket-stack" in [stack["StackName"] for stack in response["StackSummaries"]]:
         logger.info("Deleting logging bucket stack...")
-        client.delete_stack(StackName="lp-bucket-stack")
-    if "lp-trail-stack" in [stack["StackName"] for stack in response["StackSummaries"]]:
+        client.delete_stack(StackName="kelp-bucket-stack")
+    if "kelp-trail-stack" in [stack["StackName"] for stack in response["StackSummaries"]]:
         logger.info("Deleting cloudtrail stack...")
-        client.delete_stack(StackName="lp-trail-stack")
+        client.delete_stack(StackName="kelp-trail-stack")
 
     # Destroy application
     # NOTE - when this is in localstack I won't need to worry about this
