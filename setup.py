@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="aws-keLP",
-    version="0.0.1",
+    version="0.0.2",
     author="LamarrD",
     author_email="henry.773@osu.edu",
     description="Serverless IAM least privilege automation",

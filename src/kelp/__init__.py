@@ -300,7 +300,9 @@ def setup():
 
     # Setup Logger
     ch = logging.StreamHandler()
+    fh = logging.FileHandler("kelp.log")
     ch.setFormatter(CustomFormatter())
+    fh.setFormatter(CustomFormatter())
     setattr(logger, "success", lambda message, *args: logger._log(logging.SUCCESS, message, args))
     logger.setLevel(logging.SUCCESS)
     logger.success("Starting")
@@ -308,11 +310,14 @@ def setup():
     if args.debug:
         logger.setLevel(logging.DEBUG)
         ch.setLevel(logging.DEBUG)
+        fh.setLevel(logging.DEBUG)
     elif args.verbose:
         logger.setLevel(logging.INFO)
         ch.setLevel(logging.INFO)
+        fh.setLevel(logging.INFO)
 
     logger.addHandler(ch)
+    logger.addHandler(fh)
     return args
 
 
