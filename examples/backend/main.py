@@ -15,4 +15,4 @@ def lambda_handler(event, context):
 
 
 if __name__ == "__main__":
-    lambda_handler("a", "b")
+    lambda_handler("a", "b ")
