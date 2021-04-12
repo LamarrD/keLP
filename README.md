@@ -25,7 +25,7 @@
   <h3 align="center">keLP - Keeping Everything Least Privileged</h3>
 
   <p align="center">
-    keLP is a tool with the goal of automating the process of granting least privilege IAM roles for serverless applications in AWS.
+    keLP is a tool with the goal of automating the process of granting least privilege IAM roles for serverless applications in AWS. It works by reading your function definition from your IAC, deploying and executing your lambdas, then reading the resulting API calls from CloudTrail.
     <br />
     <a href="https://github.com/lamarrd/keLP"><strong>Explore the docs »</strong></a>
     <br />
