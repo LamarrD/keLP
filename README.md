@@ -41,7 +41,8 @@
 </p>
 
 
-![Demo](https://user-images.githubusercontent.com/52003089/114405302-90a24f80-9b74-11eb-938f-d83282c6f982.mp4)
+![DEMO](https://user-images.githubusercontent.com/52003089/114405766-fc84b800-9b74-11eb-951a-c1df0cba5574.mp4)
+
 
 
 <!-- GETTING STARTED -->
