@@ -51,17 +51,12 @@ To get a local copy up and running follow these simple steps.
 `pip install aws-kelp`
 
 
-
-
 <!-- USAGE EXAMPLES -->
 ## Usage
 `kelp -v`
 
+Also, see the [Actions](https://github.com/LamarrD/keLP/actions) for examples of successful runs
 
-<!-- ROADMAP -->
-## Roadmap
-
-See the [open issues](https://github.com/lamarrd/keLP/issues) for a list of proposed features (and known issues).
 
 
 

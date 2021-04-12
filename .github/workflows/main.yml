@@ -25,13 +25,13 @@ jobs:
           python-version: "3.8"
       - name: "Install requirements"
         run: pip3 install aws-kelp
-      - name: "Run keLP"
-        run: kelp
-        working-directory: examples
-      - name: Create Issue From File
-        uses: peter-evans/create-issue-from-file@v2
-        with:
-          title: keLP - Least privilege gap detected
-          token: ${{secrets.GITHUB_TOKEN}}
-          content-filepath: examples/kelp.log
-          labels: security
+      # - name: "Run keLP"
+      #   run: kelp -v
+      #   working-directory: examples
+      # - name: Create Issue From File
+      #   uses: peter-evans/create-issue-from-file@v2
+      #   with:
+      #     title: keLP - Least privilege gap detected
+      #     token: ${{secrets.GITHUB_TOKEN}}
+      #     content-filepath: examples/kelp.log
+      #     labels: security
