@@ -86,7 +86,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@lamarr_henry](https://twitter.com/lamarr_henry) - henry.773@osu.edu
+Lamarr - [@tworlamarr](https://twitter.com/tworlamarr) - lmarhenry@gmail.com
 
 
 
